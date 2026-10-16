@@ -1,7 +1,7 @@
-# Dockerfile - Containerize UIT NT219 AES Lab (Task 2)
+# Dockerfile - Containerize UIT NT219 AES Lab Task 2 (Standards A & C in modes/ layout)
 # Usage:
-#   docker build -t uit-nt219-aes-lab .
-#   docker run --rm uit-nt219-aes-lab
+#   docker build -t uit-nt219-aes-modes .
+#   docker run --rm uit-nt219-aes-modes
 
 FROM ubuntu:22.04
 
@@ -13,14 +13,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+WORKDIR /app/modes
 
-COPY AES.h AES.cpp modes.h \
-     sp800_38a.cpp sp800_38c.cpp sp800_38d.cpp sp800_38e.cpp sp800_38f.cpp \
-     c_api.h c_api.cpp main.cpp test_c.c test_import.py CMakeLists.txt Makefile ./
+COPY cmake/ ./cmake/
+COPY include/ ./include/
+COPY src/ ./src/
+COPY tests/ ./tests/
+COPY CMakeLists.txt CMakeLists_AES_v3.txt README.md ./
 
-# Build static library (libaes_crypto.a), shared library (libaes_crypto.so), and executables (main, test_c)
-RUN make -f Makefile all
+# 1. Build default CMake out-of-source build (modes/build)
+RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j$(nproc)
 
-# Run C++, C, and Python verification suites on container startup
-CMD ["make", "-f", "Makefile", "test"]
+# 2. Build explicit GCC toolchain build (modes/build-gcc)
+RUN cmake -S . -B build-gcc -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchain-GCC.cmake -DCMAKE_BUILD_TYPE=Release \
+    && cmake --build build-gcc -j$(nproc)
+
+# Run CTest + Standard A & C verification suites + C import + Python ctypes import
+CMD ["sh", "-c", "ctest --test-dir build --output-on-failure && ./build/test_sp800_38a_38c && ./build/test_c && python3 tests/test_import.py"]

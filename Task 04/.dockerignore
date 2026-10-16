@@ -1,0 +1,11 @@
+build/
+build-gcc/
+build-gcc-attn/
+*.o
+*.a
+*.so
+*.dll
+*.dylib
+*.exe
+__pycache__/
+*.pyc
