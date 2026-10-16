@@ -4,7 +4,7 @@ Lab 02 project for the **Cryptography (NT219)** course at the University of Info
 
 ---
 
-## 4 Tasks Summary
+## Tasks Summary (Tasks 1–4 & Task Bonus)
 
 ### 🔹 Task 01 — Core AES Implementation & Standard A Modes (SP 800-38A)
 - **Objective**: Implement AES-128, AES-192, and AES-256 block ciphers using pure **C++17 Standard Library** (zero third-party dependencies).
@@ -30,6 +30,13 @@ Lab 02 project for the **Cryptography (NT219)** course at the University of Info
   - Packaged via `Dockerfile` (Ubuntu 22.04, GCC, CMake, OpenSSL, Python 3) and `docker-compose.yml`.
   - Automatically builds and runs all 5 test suites (NIST KAT, SP 800-38A/C, OpenSSL crosscheck, C test, Python ctypes test) with a single command.
 
+### 🔹 Task Bonus — Countering AES Static S-Box Attack (Dynamic S-Box)
+- **Objective**: Mitigate cache-timing and side-channel vulnerabilities inherent in static substitution tables.
+- **Features**:
+  - Implements round-dependent Dynamic S-Box generation based on *Rahnama et al. (ACM SIN '13, DOI: [10.1145/2523514.2523544](https://doi.org/10.1145/2523514.2523544))*.
+  - Dynamically computes round sub-key permutations via Left Circular Shift (`BuildLCS`) and derives bijective substitution tables (`Dbox` / `iDbox`).
+  - Evaluated with NIST Modes of Operation (CBC, CTR, CCM, GCM) alongside performance benchmarking.
+
 ---
 
 ## Directory Structure
@@ -40,7 +47,7 @@ AES-LAB02/
 ├── Task 02/             # Task 2: Modular CMake library, AES-CCM, Static/Shared Lib, C ABI, Python ctypes
 ├── Task 03/             # Task 3: OpenSSL EVP cross-verification & Throughput benchmark
 ├── Task 04/             # Task 4: Dockerfile, docker-compose.yml, automated verification scripts
-├── Task Bonus/          # Extension directory
+├── Task Bonus/          # Task Bonus: Dynamic S-Box (ACM SIN '13) & side-channel countermeasures
 ├── docker-compose.yml   # Multi-service Docker Compose configuration
 └── README.md            # Project overview & documentation
 ```
@@ -76,4 +83,11 @@ docker compose up
 # Option 2: Docker build & run directly
 docker build -t uit-nt219-aes-modes "Task 04"
 docker run --rm uit-nt219-aes-modes
+```
+
+### 4. Task Bonus (Dynamic S-Box Execution)
+```bash
+cd "Task Bonus"
+./main --bonus       # Run round-by-round Dynamic S-Box verification & KAT
+./main --all         # Run AES KAT + All NIST Standards + Task Bonus
 ```
